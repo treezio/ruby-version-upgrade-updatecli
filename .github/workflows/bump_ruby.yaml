@@ -1,0 +1,38 @@
+---
+name: Bump Ruby Bundled Version
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.ruby-version'
+
+permissions:
+  contents: "write"
+  pull-requests: "write"
+
+jobs:
+  bump_ruby:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: false
+      - name: Update Gemfile.lock
+        run: |
+          bundle config --local deployment false
+          bundle update --ruby
+      - name: Commit changes
+        run: |
+          git config --global user.name "treezio"
+          git config --global user.email "bumps@treez.io"
+          git add Gemfile.lock
+          git commit -m "Update Gemfile.lock with new Ruby version" || echo "No changes to commit"
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.head_ref }}
+          force: true
