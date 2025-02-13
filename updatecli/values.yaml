@@ -1,0 +1,8 @@
+github:
+  user: "treezio"
+  email: "bumps@treez.io"
+  username: "sequbot"
+  token: "GITHUB_TOKEN"
+  branch: "main"
+  owner: "treezio"
+  repository: "ruby-version-upgrade-updatecli"
