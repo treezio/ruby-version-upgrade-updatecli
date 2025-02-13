@@ -1,0 +1,71 @@
+---
+name: Bump Ruby Version
+
+pipelineid: "ruby-version"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      branch: "{{ .github.branch }}"
+
+sources:
+  RubylatestVersion:
+    kind: githubrelease
+    name: Get the latest Ruby version
+    spec:
+      owner: ruby
+      repository: ruby
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      typefilter:
+        latest: true
+    transformers:
+    - trimprefix: "v"
+    - replacer:
+        from: "_"
+        to: "."
+
+targets:
+  rubVersionDockerTag:
+    kind: file
+    sourceid: RubylatestVersion
+    name: Update Docker Image tag for Ruby to {{ source "RubylatestVersion" }} version
+    scmid: default
+    spec:
+      file: .env
+      matchpattern: RUBY_VERSION=.*
+      replacepattern: 'RUBY_VERSION={{ source "RubylatestVersion" }}'
+  rubyVersionFile:
+    kind: file
+    sourceid: RubylatestVersion
+    name: Update Ruby Version in .ruby-version to {{ source "RubylatestVersion" }}
+    scmid: default
+    spec:
+      file: .ruby-version
+      matchpattern: ruby-.*
+      replacepattern: 'ruby-{{ source "RubylatestVersion" }}'
+  gemfileVersion:
+    kind: file
+    sourceid: RubylatestVersion
+    name: Update Ruby Version in Gemfile to {{ source "RubylatestVersion" }}
+    scmid: default
+    spec:
+      file: Gemfile
+      matchpattern: 'ruby "(.*)"'
+      replacepattern: 'ruby "{{ source "RubylatestVersion" }}"'
+
+actions:
+  default:
+    kind: github/pullrequest
+    scmid: default
+    spec:
+      labels:
+        - dependencies
+    title: Bump Ruby version to {{ source "RubylatestVersion" }}
