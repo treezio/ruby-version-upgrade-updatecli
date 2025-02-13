@@ -26,4 +26,4 @@ jobs:
           shopt -s globstar
           updatecli apply --config updatecli/updatecli.d --values updatecli/values.yaml
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN: "${{ secrets.UPGRADE_RUBY_TOKEN }}"
